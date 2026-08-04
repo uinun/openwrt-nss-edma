@@ -1,0 +1,117 @@
+name: Build OpenWrt NSS Firmware
+
+on:
+  workflow_dispatch:
+
+env:
+  OPENWRT_DIR: openwrt-nss-edma
+
+
+jobs:
+
+  build:
+
+    strategy:
+      matrix:
+        router:
+          - name: homewrk
+            config: configs/homewrk
+            target: ipq807x
+            subtarget: generic
+
+          - name: mx4200v2
+            config: configs/mx4200v2
+            target: ipq807x
+            subtarget: generic
+
+
+    runs-on: ubuntu-24.04
+
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          build-essential \
+          clang \
+          flex \
+          bison \
+          g++ \
+          gawk \
+          gcc-multilib \
+          gettext \
+          git \
+          libncurses-dev \
+          libssl-dev \
+          libelf-dev \
+          python3 \
+          python3-setuptools \
+          rsync \
+          unzip \
+          zstd \
+          file
+
+
+    - name: Clone OpenWrt
+      run: |
+        git clone \
+        -b nss-edma-rework \
+        https://github.com/JuliusBairaktaris/openwrt-nss-edma.git \
+        $OPENWRT_DIR
+
+
+    - name: Copy config
+      run: |
+
+        cd $OPENWRT_DIR
+
+        cp ../${{ matrix.router.config }}/diffconfig .config
+
+        if [ -d ../${{ matrix.router.config }}/files ]; then
+          cp -a ../${{ matrix.router.config }}/files .
+        fi
+
+
+    - name: Update feeds
+      run: |
+        cd $OPENWRT_DIR
+
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+
+
+    - name: Build
+      run: |
+
+        cd $OPENWRT_DIR
+
+        make defconfig
+
+        make download -j$(nproc)
+
+        make -j$(nproc) V=s
+
+
+    - name: Upload firmware
+      uses: actions/upload-artifact@v4
+      with:
+
+        name: ${{ matrix.router.name }}-${{ matrix.router.target }}-firmware
+
+        path: |
+          ${{ env.OPENWRT_DIR }}/bin/targets/**/*sysupgrade*
+          ${{ env.OPENWRT_DIR }}/bin/targets/**/*factory*
+          ${{ env.OPENWRT_DIR }}/bin/targets/**/*sha256*
+          ${{ env.OPENWRT_DIR }}/bin/targets/**/*profiles*
+          ${{ env.OPENWRT_DIR }}/bin/targets/**/*manifest*
+          ${{ env.OPENWRT_DIR }}/bin/targets/**/*buildinfo*
+
+        if-no-files-found: error
+
+        retention-days: 30

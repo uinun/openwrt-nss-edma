@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# radio0 5G
+# uci set wireless.radio0.channel='auto'
+uci set wireless.radio0.channel='52'
+uci set wireless.radio0.country='US'
+uci set wireless.radio1.disabled='0'
+
+
+
+# uci set wireless.default_radio0.ssid='CMCC-rax5e'
+# uci set wireless.default_radio0.encryption='sae-mixed'
+# uci set wireless.default_radio0.key='12345678'
+
+
+# radio1 2.4G
+# uci set wireless.radio1.channel='auto'
+uci set wireless.radio0.channel='3'
+uci set wireless.radio1.country='US'
+uci set wireless.radio1.disabled='0'
+
+
+# uci set wireless.default_radio1.ssid='CMCC-rax2e'
+# uci set wireless.default_radio1.encryption='sae-mixed'
+# uci set wireless.default_radio1.key='12345678'
+
+
+# radio2 5G
+# uci set wireless.radio2.channel='auto'
+# uci set wireless.radio2.htmode='HE80'
+# uci set wireless.radio2.txpower='22'
+uci set wireless.radio2.channel='136'
+uci set wireless.radio2.country='US'
+uci set wireless.radio2.disabled='0'
+
+
+# uci set wireless.default_radio2.ssid='CMCC-rax5e'
+# uci set wireless.default_radio2.encryption='sae-mixed'
+# uci set wireless.default_radio2.key='12345678'
+# uci set wireless.default_radio2.disabled='1'
+
+
+uci commit wireless
+
+
+# 强制重载无线服务
+# /sbin/wifi reload
+
+
+exit 0

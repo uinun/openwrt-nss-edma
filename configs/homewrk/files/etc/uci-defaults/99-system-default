@@ -1,0 +1,29 @@
+#!/bin/sh
+
+
+# 主机名
+uci set system.@system[0].hostname='Linksys_HomeWRK'
+
+
+# 时区：中国
+#uci set system.@system[0].timezone='CST-8'
+uci set system.@system[0].zonename='Asia/Shanghai'
+
+
+# NTP
+uci set system.ntp.enabled='1'
+
+uci delete system.ntp.server
+
+uci add_list system.ntp.server='ntp.aliyun.com'
+
+uci add_list system.ntp.server='0.openwrt.pool.ntp.org'
+
+
+
+
+uci commit system
+uci commit luci
+
+
+exit 0
