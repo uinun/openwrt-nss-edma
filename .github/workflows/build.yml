@@ -66,6 +66,37 @@ jobs:
         $OPENWRT_DIR
 
 
+    - name: Add NSS feed
+
+
+      working-directory: ${{ env.OPENWRT_DIR }}
+
+
+      run: |
+
+        cp feeds.conf.default feeds.conf
+
+
+        echo \
+        "src-git nss https://github.com/JuliusBairaktaris/nss-packages.git;edma-nss" \
+        >> feeds.conf
+
+
+    - name: Update feeds
+
+
+      working-directory: ${{ env.OPENWRT_DIR }}
+
+
+      run: |
+
+        ./scripts/feeds update -a
+
+        ./scripts/feeds install -a
+
+        ./scripts/feeds list -r nss | grep -q qca-nss-drv
+
+
     - name: Copy config
       run: |
 
@@ -76,14 +107,6 @@ jobs:
         if [ -d ../${{ matrix.router.config }}/files ]; then
           cp -a ../${{ matrix.router.config }}/files .
         fi
-
-
-    - name: Update feeds
-      run: |
-        cd $OPENWRT_DIR
-
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
 
 
     - name: Build
