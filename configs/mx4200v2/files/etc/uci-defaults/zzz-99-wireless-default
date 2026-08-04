@@ -2,7 +2,7 @@
 
 # radio0 5G
 # uci set wireless.radio0.channel='auto'
-uci set wireless.radio0.channel='52'
+# uci set wireless.radio0.channel='52'
 uci set wireless.radio0.country='US'
 uci set wireless.radio1.disabled='0'
 
@@ -15,7 +15,7 @@ uci set wireless.radio1.disabled='0'
 
 # radio1 2.4G
 # uci set wireless.radio1.channel='auto'
-uci set wireless.radio0.channel='3'
+# uci set wireless.radio0.channel='3'
 uci set wireless.radio1.country='US'
 uci set wireless.radio1.disabled='0'
 
@@ -29,7 +29,7 @@ uci set wireless.radio1.disabled='0'
 # uci set wireless.radio2.channel='auto'
 # uci set wireless.radio2.htmode='HE80'
 # uci set wireless.radio2.txpower='22'
-uci set wireless.radio2.channel='136'
+# uci set wireless.radio2.channel='136'
 uci set wireless.radio2.country='US'
 uci set wireless.radio2.disabled='0'
 

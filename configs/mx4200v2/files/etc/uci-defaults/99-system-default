@@ -2,7 +2,7 @@
 
 
 # 主机名
-uci set system.@system[0].hostname='Linksys_HomeWRK'
+uci set system.@system[0].hostname='Linksys_MX4200v2'
 
 
 # 时区：中国
