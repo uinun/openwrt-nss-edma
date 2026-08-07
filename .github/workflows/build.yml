@@ -2,6 +2,17 @@ name: Build OpenWrt NSS Firmware
 
 on:
   workflow_dispatch:
+    inputs:
+      router:
+        description: Select router to build
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - homewrk
+          - mx4200v2
+
 
 env:
   OPENWRT_DIR: openwrt-nss-edma
@@ -9,20 +20,42 @@ env:
 
 jobs:
 
+  prepare:
+    runs-on: ubuntu-24.04
+
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+
+    - name: Generate matrix
+      id: set-matrix
+      run: |
+
+        if [ "${{ github.event.inputs.router }}" = "homewrk" ]; then
+
+          echo 'matrix={"router":[{"name":"homewrk","config":"configs/homewrk","target":"ipq807x","subtarget":"generic"}]}' >> $GITHUB_OUTPUT
+
+        elif [ "${{ github.event.inputs.router }}" = "mx4200v2" ]; then
+
+          echo 'matrix={"router":[{"name":"mx4200v2","config":"configs/mx4200v2","target":"ipq807x","subtarget":"generic"}]}' >> $GITHUB_OUTPUT
+
+        else
+
+          echo 'matrix={"router":[{"name":"homewrk","config":"configs/homewrk","target":"ipq807x","subtarget":"generic"},{"name":"mx4200v2","config":"configs/mx4200v2","target":"ipq807x","subtarget":"generic"}]}' >> $GITHUB_OUTPUT
+
+        fi
+
+
+
   build:
 
-    strategy:
-      matrix:
-        router:
-          - name: homewrk
-            config: configs/homewrk
-            target: ipq807x
-            subtarget: generic
+    needs: prepare
 
-          - name: mx4200v2
-            config: configs/mx4200v2
-            target: ipq807x
-            subtarget: generic
+    strategy:
+      max-parallel: 1
+
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
 
 
     runs-on: ubuntu-24.04
@@ -61,21 +94,18 @@ jobs:
     - name: Clone OpenWrt
       run: |
         git clone \
+        --depth=1 \
         -b nss-edma-rework \
         https://github.com/JuliusBairaktaris/openwrt-nss-edma.git \
         $OPENWRT_DIR
 
 
     - name: Add NSS feed
-
-
       working-directory: ${{ env.OPENWRT_DIR }}
-
 
       run: |
 
         cp feeds.conf.default feeds.conf
-
 
         echo \
         "src-git nss https://github.com/JuliusBairaktaris/nss-packages.git;edma-nss" \
@@ -83,10 +113,7 @@ jobs:
 
 
     - name: Update feeds
-
-
       working-directory: ${{ env.OPENWRT_DIR }}
-
 
       run: |
 
@@ -102,6 +129,8 @@ jobs:
 
         cd $OPENWRT_DIR
 
+        test -f ../${{ matrix.router.config }}/diffconfig
+
         cp ../${{ matrix.router.config }}/diffconfig .config
 
         if [ -d ../${{ matrix.router.config }}/files ]; then
@@ -109,20 +138,43 @@ jobs:
         fi
 
 
-    - name: Build
-      run: |
+    - name: Generate configuration
 
-        cd $OPENWRT_DIR
+
+      working-directory: ${{ env.OPENWRT_DIR }}
+
+
+      run: |
 
         make defconfig
 
+
+    - name: Download sources
+
+
+      working-directory: ${{ env.OPENWRT_DIR }}
+
+
+      run: |
+
         make download -j$(nproc)
+
+
+    - name: Build firmware
+
+
+      working-directory: ${{ env.OPENWRT_DIR }}
+
+
+      run: |
 
         make -j$(nproc) V=s
 
 
+
     - name: Upload firmware
       uses: actions/upload-artifact@v4
+
       with:
 
         name: ${{ matrix.router.name }}-${{ matrix.router.target }}-firmware
