@@ -138,6 +138,13 @@ jobs:
         fi
 
 
+    - name: Disable FLAC LTO
+      working-directory: ${{ env.OPENWRT_DIR }}
+      run: |
+        grep -q "PKG_BUILD_FLAGS:=no-lto" feeds/packages/libs/flac/Makefile || \
+        sed -i '/PKG_RELEASE/a PKG_BUILD_FLAGS:=no-lto' feeds/packages/libs/flac/Makefile
+
+
     - name: Generate configuration
 
 
