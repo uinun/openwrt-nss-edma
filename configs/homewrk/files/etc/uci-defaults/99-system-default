@@ -17,6 +17,10 @@ uci delete system.ntp.server
 
 uci add_list system.ntp.server='ntp.aliyun.com'
 
+uci add_list system.ntp.server='cn.ntp.org.cn'
+
+uci add_list system.ntp.server='ntp.ntsc.ac.cn'
+
 uci add_list system.ntp.server='0.openwrt.pool.ntp.org'
 
 

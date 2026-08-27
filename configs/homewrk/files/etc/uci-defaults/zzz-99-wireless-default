@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# HomeWRK wireless defaults
+
+# 5GHz low band
+uci set wireless.radio0.channel='36'
+uci set wireless.radio0.country='US'
+uci set wireless.radio0.htmode='HE80'
+uci set wireless.radio0.disabled='0'
+
+uci set wireless.default_radio0.ssid='Openwrt5.2G'
+uci set wireless.default_radio0.encryption='sae-mixed'
+uci set wireless.default_radio0.key='12345678'
+uci set wireless.default_radio0.disabled='0'
+
+
+# 2.4GHz
+uci set wireless.radio1.channel='1'
+uci set wireless.radio1.country='US'
+uci set wireless.radio1.htmode='HE20'
+uci set wireless.radio1.disabled='0'
+
+uci set wireless.default_radio1.ssid='OPenwrt2.4G'
+uci set wireless.default_radio1.encryption='sae-mixed'
+uci set wireless.default_radio1.key='12345678'
+uci set wireless.default_radio1.disabled='0'
+
+
+# 5GHz high band
+uci set wireless.radio2.channel='161'
+uci set wireless.radio2.country='US'
+uci set wireless.radio2.htmode='HE80'
+uci set wireless.radio2.disabled='0'
+
+uci set wireless.default_radio2.ssid='Openwrt5.8G'
+uci set wireless.default_radio2.encryption='sae-mixed'
+uci set wireless.default_radio2.key='12345678'
+uci set wireless.default_radio2.disabled='0'
+
+
+uci commit wireless
+
+exit 0
