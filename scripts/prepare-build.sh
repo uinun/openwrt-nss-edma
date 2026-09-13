@@ -28,6 +28,15 @@ source "$(dirname -- "$0")/lib/log.sh"
 : "${VARIANT:?VARIANT required}"
 : "${DEVICE:?DEVICE required}"
 
+# 将相对路径转为绝对路径，防止 cd $OPENWRT_DIR 之后找不到 builder 目录
+# 解决在github编译时出现下面错误终止运行
+# [INFO] Assembling .config from devices/common/config
+# devices/homewrk/config
+# cat: builder/devices/common/config: No such file or directory
+# cat: builder/devices/homewrk/config: No such file or directory
+# Error: Process completed with exit code 1. 
+BUILDER_REPO="$(cd "$BUILDER_REPO" && pwd)"
+
 FEEDS="${FEEDS:-}"
 CONFIG_FRAGMENT="${CONFIG_FRAGMENT:-}"
 COMMON_DIR="$BUILDER_REPO/devices/${COMMON:-common}"
