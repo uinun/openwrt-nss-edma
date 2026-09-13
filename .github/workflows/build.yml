@@ -22,7 +22,7 @@ env:
   COMMON: common
   VARIANT: edma-nss
   OPENWRT_DIR: openwrt-nss-edma
-  FEEDS: "src-git luci https://github.com/JuliusBairaktaris/luci.git;luci-app-ppe-qos"
+  FEEDS: "src-git nss https://github.com/JuliusBairaktaris/nss-packages.git;edma-nss"
 
 jobs:
   # 步骤 1：解析用户输入，动态生成 matrix
