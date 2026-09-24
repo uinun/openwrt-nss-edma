@@ -4,7 +4,7 @@
 # =========================
 # 主机名、系统时区与国内 NTP 配置
 # =========================
-uci set system.@system[0].hostname='RAX3000M_EMMC'
+uci set system.@system[0].hostname='Sax1v1k'
 uci set system.@system[0].zonename='Asia/Shanghai'
 uci set system.@system[0].timezone='CST-8'
 

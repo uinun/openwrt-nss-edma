@@ -1,0 +1,39 @@
+#!/bin/sh
+
+wlan_name="OpenWrt"
+
+# =========================
+# Wi-Fi 基础与接口配置
+# =========================
+# 确保无线默认配置文件已生成
+if [ ! -s /etc/config/wireless ]; then
+    wifi config
+fi
+
+# 启用所有物理射频芯片并配置国家码
+for dev in $(uci show wireless 2>/dev/null | grep '=wifi-device' | cut -d. -f2 | cut -d= -f1); do
+    uci set wireless.${dev}.disabled='0'
+    uci set wireless.${dev}.country='CN'
+    # uci set wireless.${dev}.channel='auto'
+done
+
+# 兼容具名与匿名两种形式，配置并启用所有 wifi-iface
+iface_count=$(uci show wireless | grep -c '=wifi-iface')
+i=0
+while [ "$i" -lt "$iface_count" ]; do
+  uci set wireless.@wifi-iface[$i].disabled='0'
+  uci set wireless.@wifi-iface[$i].ssid="$wlan_name"
+  # 若需启用密码，取消下面两行注释：
+  uci set wireless.@wifi-iface[$i].encryption='sae-mixed'
+  uci set wireless.@wifi-iface[$i].key='12345678'
+  i=$((i + 1))
+done
+
+# =========================
+# 提交更改
+# =========================
+
+uci commit wireless
+
+
+exit 0

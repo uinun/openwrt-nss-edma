@@ -12,6 +12,7 @@ on:
           - all
           - homewrk
           - mx4300
+          - sax1v1k
 
 permissions:
   contents: read
@@ -35,8 +36,8 @@ jobs:
         run: |
           SELECTED="${{ github.event.inputs.target_device }}"
           if [ "$SELECTED" = "all" ]; then
-            # 当选择 all 时，包含两个设备
-            echo 'devices=["homewrk", "mx4300"]' >> "$GITHUB_OUTPUT"
+            # 当选择 all 时，包含全部设备
+            echo 'devices=["homewrk", "mx4300","sax1v1k"]' >> "$GITHUB_OUTPUT"
           else
             # 当选择单一设备时，只包含该设备
             echo "devices=[\"$SELECTED\"]" >> "$GITHUB_OUTPUT"
