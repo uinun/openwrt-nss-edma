@@ -1,0 +1,32 @@
+#!/bin/sh
+
+
+# =========================
+# 主机名、系统时区与国内 NTP 配置
+# =========================
+uci set system.@system[0].hostname='XG-040G-MD'
+uci set system.@system[0].zonename='Asia/Shanghai'
+uci set system.@system[0].timezone='CST-8'
+
+# 兼容具名 ntp 与匿名 timeserver 节点
+if uci get system.ntp >/dev/null 2>&1; then
+    NTP_SEC="system.ntp"
+else
+    NTP_SEC="system.@timeserver[0]"
+fi
+
+uci -q delete ${NTP_SEC}.server
+uci add_list ${NTP_SEC}.server='ntp.aliyun.com'
+uci add_list ${NTP_SEC}.server='ntp.tencent.com'
+uci add_list ${NTP_SEC}.server='ntp.ntsc.ac.cn'
+uci add_list ${NTP_SEC}.server='cn.pool.ntp.org'
+uci set ${NTP_SEC}.enable_server='0'
+uci set ${NTP_SEC}.enabled='1'
+
+
+
+
+uci commit system
+
+
+exit 0

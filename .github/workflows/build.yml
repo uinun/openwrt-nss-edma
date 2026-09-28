@@ -1,0 +1,120 @@
+name: Build ponwrt firmware
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_device:
+        description: '请选择要编译的路由器机型 (Select device)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - 040G-MD
+          - 140G-MD
+          - 040G-TF
+
+permissions:
+  contents: read
+
+env:
+  UPSTREAM_REPO: pbs05/ponwrt
+  UPSTREAM_REF: master
+  COMMON: common
+  OPENWRT_DIR: ponwrt
+  VARIANT: default
+
+jobs:
+  # 步骤 1：解析用户输入，动态生成 matrix
+  setup-matrix:
+    runs-on: ubuntu-24.04
+    outputs:
+      devices: ${{ steps.set-devices.outputs.devices }}
+    steps:
+      - id: set-devices
+        run: |
+          SELECTED="${{ github.event.inputs.target_device }}"
+          if [ "$SELECTED" = "all" ]; then
+            # 当选择 all 时，包含全部设备
+            echo 'devices=["040G-MD", "140G-MD","040G-TF"]' >> "$GITHUB_OUTPUT"
+          else
+            # 当选择单一设备时，只包含该设备
+            echo "devices=[\"$SELECTED\"]" >> "$GITHUB_OUTPUT"
+          fi
+
+  # 步骤 2：并行/独立构建
+  build:
+    needs: setup-matrix
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        device: ${{ fromJson(needs.setup-matrix.outputs.devices) }}
+
+    steps:
+    - name: Free Disk Space
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: true
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+          bzip2 ccache clang cmake cpio curl device-tree-compiler ecj fastjar flex gawk gettext gcc-multilib \
+          g++-multilib git gnutls-dev gperf haveged help2man intltool lib32gcc-s1 libc6-dev-i386 libelf-dev \
+          libglib2.0-dev libgmp3-dev libltdl-dev libmpfr-dev libncurses-dev libpython3-dev \
+          libreadline-dev libssl-dev libtool libyaml-dev libz-dev lld llvm lrzsz mkisofs msmtp nano \
+          ninja-build p7zip p7zip-full patch pkgconf python3 python3-pip python3-ply python3-docutils \
+          python3-pyelftools qemu-utils re2c rsync scons squashfs-tools subversion swig texinfo uglifyjs \
+          upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd
+
+    - name: Checkout builder
+      uses: actions/checkout@v4
+      with:
+        path: builder
+
+    - name: Checkout ponwrt
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ env.UPSTREAM_REPO }}
+        ref: ${{ env.UPSTREAM_REF }}
+        path: ${{ env.OPENWRT_DIR }}
+
+    - name: Prepare build environment
+      env:
+        OPENWRT_DIR: ${{ env.OPENWRT_DIR }}
+        BUILDER_REPO: builder
+        DEVICE: ${{ matrix.device }}
+        COMMON: ${{ env.COMMON }}
+        VARIANT: ${{ env.VARIANT }}
+      run: |
+        bash builder/scripts/prepare-build.sh
+
+    - name: Download sources
+      working-directory: ${{ env.OPENWRT_DIR }}
+      run: |
+        make download -j$(nproc)
+
+    - name: Build
+      working-directory: ${{ env.OPENWRT_DIR }}
+      run: |
+        make -j$(nproc) || make -j1 V=s
+
+    - name: Upload firmware
+      uses: actions/upload-artifact@v4
+      with:
+        name: ponwrt-${{ matrix.device }}
+        path: |
+          ${{ env.OPENWRT_DIR }}/bin/targets/**/*sysupgrade*
+          ${{ env.OPENWRT_DIR }}/bin/targets/**/*sha256*
+          ${{ env.OPENWRT_DIR }}/bin/targets/**/*profiles*
+          ${{ env.OPENWRT_DIR }}/bin/targets/**/*manifest*
+          ${{ env.OPENWRT_DIR }}/bin/targets/**/*buildinfo*
