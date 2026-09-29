@@ -284,6 +284,8 @@ CONFIG_SQLITE3_RTREE=y
 CONFIG_USE_LLVM_HOST=y
 # CONFIG_WPA_MBO_SUPPORT is not set
 
-
-CONFIG_PACKAGE_kmod-usb3=y
-CONFIG_PACKAGE_kmod-usb-xhci=y
+## SSH Server Configuration
+CONFIG_PACKAGE_dropbear=n
+CONFIG_PACKAGE_openssh-moduli=y
+CONFIG_PACKAGE_openssh-server=y
+CONFIG_PACKAGE_openssh-sftp-server=y
