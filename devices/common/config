@@ -1,17 +1,20 @@
-# CONFIG_TARGET_airoha=y
-# CONFIG_TARGET_airoha_an7581=y
-# CONFIG_TARGET_airoha_an7581_DEVICE_nokia_xg-040g-md-ubi=y
 CONFIG_DEVEL=y
 CONFIG_BUSYBOX_CUSTOM=y
 # CONFIG_BPF_TOOLCHAIN_BUILD_LLVM is not set
 CONFIG_BPF_TOOLCHAIN_HOST=y
 CONFIG_BPF_TOOLCHAIN_HOST_PATH=""
 CONFIG_BUSYBOX_CONFIG_DEVMEM=y
-# CONFIG_DRIVER_11AC_SUPPORT=y
-# CONFIG_DRIVER_11AX_SUPPORT=y
+# CONFIG_DRIVER_11AC_SUPPORT is not set
+# CONFIG_DRIVER_11AX_SUPPORT is not set
+CONFIG_GNUTLS_ALPN=y
+CONFIG_GNUTLS_ANON=y
+CONFIG_GNUTLS_DTLS_SRTP=y
+CONFIG_GNUTLS_HEARTBEAT=y
+CONFIG_GNUTLS_OCSP=y
+CONFIG_GNUTLS_PSK=y
 CONFIG_KERNEL_DEVMEM=y
-# CONFIG_KERNEL_PAGE_POOL=y
-# CONFIG_KERNEL_RELAY=y
+CONFIG_KERNEL_PAGE_POOL=y
+CONFIG_KERNEL_RELAY=y
 CONFIG_LIBCURL_COOKIES=y
 CONFIG_LIBCURL_CRYPTO_AUTH=y
 CONFIG_LIBCURL_FILE=y
@@ -28,43 +31,39 @@ CONFIG_LIBCURL_UNIX_SOCKETS=y
 CONFIG_LIBCURL_ZLIB=y
 CONFIG_LIBNCURSES_TERMINFO=""
 CONFIG_LUCI_LANG_zh_Hans=y
-# CONFIG_PACKAGE_MAC80211_DEBUGFS=y
-# CONFIG_PACKAGE_MAC80211_MESH=y
+# CONFIG_PACKAGE_MAC80211_DEBUGFS is not set
+# CONFIG_PACKAGE_MAC80211_MESH is not set
 CONFIG_PACKAGE_airoha-en8811h-firmware=y
 CONFIG_PACKAGE_airoha-pon-debug=y
+CONFIG_PACKAGE_attr=y
 CONFIG_PACKAGE_autocore=y
+CONFIG_PACKAGE_avahi-dbus-daemon=y
 CONFIG_PACKAGE_bash=y
 CONFIG_PACKAGE_blockd=y
 CONFIG_PACKAGE_cfdisk=y
 CONFIG_PACKAGE_cgi-io=y
 CONFIG_PACKAGE_conntrack=y
 CONFIG_PACKAGE_curl=y
+CONFIG_PACKAGE_dbus=y
 CONFIG_PACKAGE_e2fsprogs=y
 CONFIG_PACKAGE_ethtool-full=y
 CONFIG_PACKAGE_hd-idle=y
-# CONFIG_PACKAGE_hostapd-common=m
+# CONFIG_PACKAGE_hostapd-common is not set
 CONFIG_PACKAGE_i2c-tools=y
 CONFIG_PACKAGE_ip-bridge=y
 CONFIG_PACKAGE_iperf3=y
-# CONFIG_PACKAGE_iw=m
-# CONFIG_PACKAGE_kmod-airoha-en7572=m
-# CONFIG_PACKAGE_kmod-airoha-paged-bosa=m
-CONFIG_PACKAGE_kmod-asn1-decoder=y
-# CONFIG_PACKAGE_kmod-cfg80211=m
+# CONFIG_PACKAGE_iw is not set
+CONFIG_PACKAGE_kmod-airoha-en7572=y
+CONFIG_PACKAGE_kmod-airoha-paged-bosa=y
+# CONFIG_PACKAGE_kmod-cfg80211 is not set
 CONFIG_PACKAGE_kmod-crypto-aead=y
 CONFIG_PACKAGE_kmod-crypto-authenc=y
 CONFIG_PACKAGE_kmod-crypto-cbc=y
-CONFIG_PACKAGE_kmod-crypto-ccm=y
+# CONFIG_PACKAGE_kmod-crypto-ccm is not set
 CONFIG_PACKAGE_kmod-crypto-chacha20poly1305=y
 CONFIG_PACKAGE_kmod-crypto-cmac=y
-CONFIG_PACKAGE_kmod-crypto-ctr=y
 CONFIG_PACKAGE_kmod-crypto-cts=y
-CONFIG_PACKAGE_kmod-crypto-des=y
-CONFIG_PACKAGE_kmod-crypto-ecb=y
-CONFIG_PACKAGE_kmod-crypto-gcm=y
-CONFIG_PACKAGE_kmod-crypto-geniv=y
-CONFIG_PACKAGE_kmod-crypto-gf128=y
-CONFIG_PACKAGE_kmod-crypto-ghash=y
+# CONFIG_PACKAGE_kmod-crypto-geniv is not set
 CONFIG_PACKAGE_kmod-crypto-hmac=y
 CONFIG_PACKAGE_kmod-crypto-kpp=y
 CONFIG_PACKAGE_kmod-crypto-lib-chacha20=y
@@ -72,34 +71,30 @@ CONFIG_PACKAGE_kmod-crypto-lib-chacha20poly1305=y
 CONFIG_PACKAGE_kmod-crypto-lib-curve25519=y
 CONFIG_PACKAGE_kmod-crypto-lib-poly1305=y
 CONFIG_PACKAGE_kmod-crypto-manager=y
-CONFIG_PACKAGE_kmod-crypto-md5=y
 CONFIG_PACKAGE_kmod-crypto-null=y
-CONFIG_PACKAGE_kmod-crypto-rng=y
-CONFIG_PACKAGE_kmod-crypto-seqiv=y
+# CONFIG_PACKAGE_kmod-crypto-rng is not set
+# CONFIG_PACKAGE_kmod-crypto-seqiv is not set
 CONFIG_PACKAGE_kmod-crypto-sha256=y
-CONFIG_PACKAGE_kmod-crypto-sha3=y
+# CONFIG_PACKAGE_kmod-crypto-sha3 is not set
 CONFIG_PACKAGE_kmod-crypto-sha512=y
 CONFIG_PACKAGE_kmod-dnsresolver=y
 CONFIG_PACKAGE_kmod-fs-autofs4=y
 CONFIG_PACKAGE_kmod-fs-exportfs=y
-CONFIG_PACKAGE_kmod-fs-ksmbd=y
-CONFIG_PACKAGE_kmod-fs-netfs=y
 CONFIG_PACKAGE_kmod-fs-nfs=y
 CONFIG_PACKAGE_kmod-fs-nfs-common=y
 CONFIG_PACKAGE_kmod-fs-nfs-common-rpcsec=y
 CONFIG_PACKAGE_kmod-fs-nfsd=y
 CONFIG_PACKAGE_kmod-fs-ntfs3=y
-CONFIG_PACKAGE_kmod-fs-smbfs-common=y
 CONFIG_PACKAGE_kmod-fs-xfs=y
-# CONFIG_PACKAGE_kmod-hwmon-core=m
-# CONFIG_PACKAGE_kmod-i2c-core=m
-# CONFIG_PACKAGE_kmod-inet-diag=y
-# CONFIG_PACKAGE_kmod-libphy=m
-# CONFIG_PACKAGE_kmod-mac80211=m
-# CONFIG_PACKAGE_kmod-mt76-connac=m
-# CONFIG_PACKAGE_kmod-mt76-core=m
-# CONFIG_PACKAGE_kmod-mt7915e=m
-# CONFIG_PACKAGE_kmod-mt7916-firmware=m
+CONFIG_PACKAGE_kmod-hwmon-core=y
+CONFIG_PACKAGE_kmod-i2c-core=y
+CONFIG_PACKAGE_kmod-inet-diag=y
+CONFIG_PACKAGE_kmod-libphy=y
+# CONFIG_PACKAGE_kmod-mac80211 is not set
+# CONFIG_PACKAGE_kmod-mt76-connac is not set
+# CONFIG_PACKAGE_kmod-mt76-core is not set
+# CONFIG_PACKAGE_kmod-mt7915e is not set
+# CONFIG_PACKAGE_kmod-mt7916-firmware is not set
 CONFIG_PACKAGE_kmod-netlink-diag=y
 CONFIG_PACKAGE_kmod-nf-socket=y
 CONFIG_PACKAGE_kmod-nf-tproxy=y
@@ -109,41 +104,46 @@ CONFIG_PACKAGE_kmod-nft-queue=y
 CONFIG_PACKAGE_kmod-nft-socket=y
 CONFIG_PACKAGE_kmod-nft-tproxy=y
 CONFIG_PACKAGE_kmod-nls-cp936=y
-CONFIG_PACKAGE_kmod-nls-ucs2-utils=y
 CONFIG_PACKAGE_kmod-oid-registry=y
 CONFIG_PACKAGE_kmod-ovpn-backports=y
 CONFIG_PACKAGE_kmod-phy-airoha-en8811h=y
-# CONFIG_PACKAGE_kmod-phy-maxlinear=m
-# CONFIG_PACKAGE_kmod-phy-realtek=m
-# CONFIG_PACKAGE_kmod-polynomial=m
-# CONFIG_PACKAGE_kmod-regulator-userspace-consumer=m
+# CONFIG_PACKAGE_kmod-phy-maxlinear is not set
+# CONFIG_PACKAGE_kmod-phy-realtek is not set
+# CONFIG_PACKAGE_kmod-polynomial is not set
+# CONFIG_PACKAGE_kmod-regulator-userspace-consumer is not set
 CONFIG_PACKAGE_kmod-sched-cake=y
 CONFIG_PACKAGE_kmod-sched-core=y
 CONFIG_PACKAGE_kmod-tcp-bbr=y
-# CONFIG_PACKAGE_kmod-thermal=m
+CONFIG_PACKAGE_kmod-thermal=y
 CONFIG_PACKAGE_kmod-tun=y
 CONFIG_PACKAGE_kmod-udptunnel4=y
 CONFIG_PACKAGE_kmod-udptunnel6=y
 CONFIG_PACKAGE_kmod-usb-ehci=y
-# CONFIG_PACKAGE_kmod-usb-ledtrig-usbport=m
+# CONFIG_PACKAGE_kmod-usb-ledtrig-usbport is not set
 CONFIG_PACKAGE_kmod-usb-storage-extras=y
 CONFIG_PACKAGE_kmod-usb2=y
 CONFIG_PACKAGE_kmod-wireguard=y
-CONFIG_PACKAGE_ksmbd-server=y
 CONFIG_PACKAGE_libatomic=y
+CONFIG_PACKAGE_libattr=y
+CONFIG_PACKAGE_libavahi-client=y
+CONFIG_PACKAGE_libavahi-dbus-support=y
 CONFIG_PACKAGE_libblkid=y
 CONFIG_PACKAGE_libcap=y
 CONFIG_PACKAGE_libcomerr=y
 CONFIG_PACKAGE_libcurl=y
+CONFIG_PACKAGE_libdaemon=y
+CONFIG_PACKAGE_libdbus=y
 CONFIG_PACKAGE_libe2p=y
 CONFIG_PACKAGE_libevdev=y
 CONFIG_PACKAGE_libevent2-core=y
+CONFIG_PACKAGE_libexpat=y
 CONFIG_PACKAGE_libext2fs=y
 CONFIG_PACKAGE_libfdisk=y
+CONFIG_PACKAGE_libgnutls=y
 CONFIG_PACKAGE_libi2c=y
 CONFIG_PACKAGE_libiperf3=y
-CONFIG_PACKAGE_libiwinfo=y
-CONFIG_PACKAGE_libiwinfo-data=y
+# CONFIG_PACKAGE_libiwinfo is not set
+# CONFIG_PACKAGE_libiwinfo-data is not set
 CONFIG_PACKAGE_liblua=y
 CONFIG_PACKAGE_liblucihttp=y
 CONFIG_PACKAGE_liblucihttp-lua=y
@@ -160,19 +160,22 @@ CONFIG_PACKAGE_libnl-core=y
 CONFIG_PACKAGE_libnl-genl=y
 CONFIG_PACKAGE_libnl-nf=y
 CONFIG_PACKAGE_libnl-route=y
-# CONFIG_PACKAGE_libopenssl-conf=m
-# CONFIG_PACKAGE_libopenssl-legacy=m
+# CONFIG_PACKAGE_libopenssl-conf is not set
+# CONFIG_PACKAGE_libopenssl-legacy is not set
 CONFIG_PACKAGE_libpcap=y
 CONFIG_PACKAGE_libpcre2=y
+CONFIG_PACKAGE_libpopt=y
 CONFIG_PACKAGE_libreadline=y
 CONFIG_PACKAGE_librt=y
 CONFIG_PACKAGE_libruby=y
 CONFIG_PACKAGE_libsmartcols=y
 CONFIG_PACKAGE_libsqlite3=y
 CONFIG_PACKAGE_libss=y
+CONFIG_PACKAGE_libtasn1=y
 CONFIG_PACKAGE_libtirpc=y
 CONFIG_PACKAGE_libubus-lua=y
 CONFIG_PACKAGE_libudev-zero=y
+CONFIG_PACKAGE_liburing=y
 CONFIG_PACKAGE_libusb-1.0=y
 CONFIG_PACKAGE_libuuid=y
 CONFIG_PACKAGE_libuv=y
@@ -187,10 +190,10 @@ CONFIG_PACKAGE_luci=y
 CONFIG_PACKAGE_luci-app-firewall=y
 CONFIG_PACKAGE_luci-app-hd-idle=y
 CONFIG_PACKAGE_luci-app-iptv=y
-CONFIG_PACKAGE_luci-app-ksmbd=y
 CONFIG_PACKAGE_luci-app-nfs=y
 CONFIG_PACKAGE_luci-app-package-manager=y
 CONFIG_PACKAGE_luci-app-pon=y
+CONFIG_PACKAGE_luci-app-samba4=y
 CONFIG_PACKAGE_luci-app-ttyd=y
 CONFIG_PACKAGE_luci-base=y
 CONFIG_PACKAGE_luci-compat=y
@@ -198,10 +201,10 @@ CONFIG_PACKAGE_luci-i18n-base-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-firewall-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-iptv-zh-cn=y
-CONFIG_PACKAGE_luci-i18n-ksmbd-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-nfs-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-package-manager-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-pon-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-ttyd-zh-cn=y
 CONFIG_PACKAGE_luci-lib-base=y
 CONFIG_PACKAGE_luci-lib-ip=y
@@ -226,12 +229,12 @@ CONFIG_PACKAGE_nfs-utils=y
 CONFIG_PACKAGE_rpcbind=y
 CONFIG_PACKAGE_rpcd=y
 CONFIG_PACKAGE_rpcd-mod-file=y
-CONFIG_PACKAGE_rpcd-mod-iwinfo=y
+# CONFIG_PACKAGE_rpcd-mod-iwinfo is not set
 CONFIG_PACKAGE_rpcd-mod-luci=y
 CONFIG_PACKAGE_rpcd-mod-rpcsys=y
 CONFIG_PACKAGE_rpcd-mod-rrdns=y
 CONFIG_PACKAGE_rpcd-mod-ucode=y
-# CONFIG_PACKAGE_rtl826x-firmware=m
+# CONFIG_PACKAGE_rtl826x-firmware is not set
 CONFIG_PACKAGE_ruby=y
 CONFIG_PACKAGE_ruby-bigdecimal=y
 CONFIG_PACKAGE_ruby-date=y
@@ -243,6 +246,8 @@ CONFIG_PACKAGE_ruby-pstore=y
 CONFIG_PACKAGE_ruby-psych=y
 CONFIG_PACKAGE_ruby-stringio=y
 CONFIG_PACKAGE_ruby-yaml=y
+CONFIG_PACKAGE_samba4-libs=y
+CONFIG_PACKAGE_samba4-server=y
 CONFIG_PACKAGE_tcpdump=y
 CONFIG_PACKAGE_terminfo=y
 CONFIG_PACKAGE_ttyd=y
@@ -250,22 +255,26 @@ CONFIG_PACKAGE_ucode-mod-html=y
 CONFIG_PACKAGE_ucode-mod-log=y
 CONFIG_PACKAGE_ucode-mod-lua=y
 CONFIG_PACKAGE_ucode-mod-math=y
-# CONFIG_PACKAGE_ucode-mod-nl80211=m
-# CONFIG_PACKAGE_ucode-mod-rtnl=m
+# CONFIG_PACKAGE_ucode-mod-nl80211 is not set
+CONFIG_PACKAGE_ucode-mod-rtnl=y
 CONFIG_PACKAGE_uhttpd=y
 CONFIG_PACKAGE_uhttpd-mod-ubus=y
 CONFIG_PACKAGE_unzip=y
 CONFIG_PACKAGE_usbids=y
 CONFIG_PACKAGE_usbutils=y
 CONFIG_PACKAGE_wget-ssl=y
-# CONFIG_PACKAGE_wifi-scripts=m
-# CONFIG_PACKAGE_wireless-regdb=m
-# CONFIG_PACKAGE_wpad-openssl=m
+# CONFIG_PACKAGE_wifi-scripts is not set
+# CONFIG_PACKAGE_wireless-regdb is not set
+# CONFIG_PACKAGE_wpad-openssl is not set
 CONFIG_PACKAGE_wsdd2=y
-# CONFIG_PACKAGE_znxt-zn515-mt7916-eeprom=m
+# CONFIG_PACKAGE_znxt-zn515-mt7916-eeprom is not set
 CONFIG_PCRE2_JIT_ENABLED=y
 CONFIG_RPCBIND_LIBWRAP=y
 CONFIG_RPCBIND_RMTCALLS=y
+CONFIG_SAMBA4_SERVER_AVAHI=y
+CONFIG_SAMBA4_SERVER_NETBIOS=y
+CONFIG_SAMBA4_SERVER_VFS=y
+CONFIG_SAMBA4_SERVER_WSDD2=y
 CONFIG_SQLITE3_COLUMN_METADATA=y
 CONFIG_SQLITE3_DYNAMIC_EXTENSIONS=y
 CONFIG_SQLITE3_FTS3=y
@@ -273,12 +282,8 @@ CONFIG_SQLITE3_FTS4=y
 CONFIG_SQLITE3_FTS5=y
 CONFIG_SQLITE3_RTREE=y
 CONFIG_USE_LLVM_HOST=y
-# CONFIG_WPA_MBO_SUPPORT=y
-# CONFIG_WPA_MSG_MIN_PRIORITY=3
+# CONFIG_WPA_MBO_SUPPORT is not set
 
 
-## SSH Server Configuration
-CONFIG_PACKAGE_dropbear=n
-CONFIG_PACKAGE_openssh-moduli=y
-CONFIG_PACKAGE_openssh-server=y
-CONFIG_PACKAGE_openssh-sftp-server=y
+CONFIG_PACKAGE_kmod-usb3=y
+CONFIG_PACKAGE_kmod-usb-xhci=y
