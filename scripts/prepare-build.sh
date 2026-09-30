@@ -101,9 +101,14 @@ for p in "$BUILDER_REPO/patches/feeds/$VARIANT"/*/*.patch; do
 done
 shopt -u nullglob
 
+
 # 2. Assemble .config from the common + device configs, then resolve.
 log::info "Assembling .config from ${CONFIGS[*]#"$BUILDER_REPO"/}"
-cat "${CONFIGS[@]}" >.config
+: > .config
+for cfg in "${CONFIGS[@]}"; do
+  cat "$cfg" >> .config
+  echo "" >> .config
+done
 make defconfig
 
 # 2b. Verify defconfig honoured the device config. Kconfig silently drops a
@@ -116,7 +121,7 @@ log::info "Verifying defconfig kept the requested symbols"
 dropped=()
 while IFS= read -r req; do
   grep -qxF "$req" .config || dropped+=("$req")
-done < <(cat "${CONFIGS[@]}" |
+done < <(for cfg in "${CONFIGS[@]}"; do cat "$cfg"; echo ""; done |
   grep -E '^CONFIG_[A-Za-z0-9_-]+=' |
   awk -F= '{ last[$1] = $0 } END { for (s in last) print last[s] }' |
   grep -vE '=n$')
