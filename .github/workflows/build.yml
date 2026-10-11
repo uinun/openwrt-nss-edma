@@ -19,7 +19,7 @@ permissions:
 
 env:
   UPSTREAM_REPO: JuliusBairaktaris/openwrt-nss-edma
-  UPSTREAM_REF: nss-edma-rework
+  UPSTREAM_REF: nss-edma-7.3
   COMMON: common
   VARIANT: edma-nss
   OPENWRT_DIR: openwrt-nss-edma

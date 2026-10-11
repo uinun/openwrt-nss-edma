@@ -1,5 +1,24 @@
+#
+# Build config shared by every device in this repo — the NSS offload stack and
+# everything else that does not depend on which board is being built.
+#
+# prepare-build.sh concatenates this with devices/<device>/config (that file
+# wins on any symbol set in both) and runs `make defconfig`.
+#
+
+## Target Platform
+CONFIG_TARGET_qualcommax=y
+## The subtarget is set per group in devices/<group>/config.
+
+## Sysupgrade-only images: the audience is people who already run OpenWrt, so
+## no initramfs/factory install images. initramfs is default-y for this target,
+## and the Asus RT-AX89X's recovery .trx caps its kernel at 16 MiB where the NSS
+## initramfs kernel is ~21 MiB, so it cannot be built at all.
+# CONFIG_TARGET_ROOTFS_INITRAMFS is not set
+
 ## Compiler and Toolchain Optimization
 CONFIG_BINUTILS_USE_VERSION_2_46=y
+CONFIG_CCACHE=y
 CONFIG_DEVEL=y
 CONFIG_GCC_USE_VERSION_15=y
 CONFIG_TARGET_OPTIMIZATION="-O2 -pipe -mcpu=cortex-a53"
@@ -9,7 +28,6 @@ CONFIG_USE_GC_SECTIONS=y
 CONFIG_USE_LTO=y
 CONFIG_USE_MOLD=y
 CONFIG_ZLIB_OPTIMIZE_SPEED=y
-# CONFIG_CCACHE is not set
 
 ## Kernel Build Options
 CONFIG_BUILD_PATENTED=y
@@ -56,13 +74,14 @@ CONFIG_PACKAGE_luci=y
 CONFIG_PACKAGE_luci-app-firewall=y
 CONFIG_PACKAGE_wpad-openssl=y
 
+## WireGuard, for the same reason.
+CONFIG_PACKAGE_kmod-wireguard=y
+
 ## Redundant Default Packages
 CONFIG_PACKAGE_wpad-basic-mbedtls=n
 CONFIG_PACKAGE_luci-app-attendedsysupgrade=n
 CONFIG_PACKAGE_attendedsysupgrade-common=n
 
-# Disable unnecessary debugging for Wi-Fi driver.
-CONFIG_ATH11K_DEBUGFS_HTT_STATS=n
 # Per-station ath11k debugfs (hosts the wifili per-peer firmware stats file
 # nss_stats - A-MSDU aggregation, OFDMA and MPDU retry counters for offloaded
 # stations - plus the ext tx/rx stats histograms).
@@ -76,11 +95,8 @@ CONFIG_PACKAGE_kmod-qca-nss-drv-pppoe=y
 ## kmod-qca-nss-drv-bridge-mgr: hardware offload of wired LAN-bridge forwarding
 ## (brought up by nss-up alongside the rest of the plane).
 CONFIG_PACKAGE_kmod-qca-nss-drv-bridge-mgr=y
-## kmod-qca-mcs: IGMP/MLD bridge snooping; enables the ECM multicast classifier
-## (ECM_MULTICAST_ENABLE) so snooped groups replicate in PPE hardware instead of
-## flooding to the host. Loaded by nss-up before ECM. Depends on the mroute
-## kernel options (kept explicit here).
-CONFIG_PACKAGE_kmod-qca-mcs=y
+## The mroute kernel options give ECM the MFC offload hooks; ECM reads the
+## bridge's own multicast database for the LAN ports (kept explicit here).
 CONFIG_KERNEL_IP_MROUTE=y
 CONFIG_KERNEL_IPV6_MROUTE=y
 ## Same-subnet multicast is hardware-bridged (switchdev MDB -> PPE) with the
@@ -99,8 +115,8 @@ CONFIG_PACKAGE_MAC80211_NSS_SUPPORT=y
 ## NSS qdisc/SQM (nss-edma.qos) + the SQM LuCI app
 CONFIG_PACKAGE_kmod-qca-nss-drv-qdisc=y
 CONFIG_PACKAGE_kmod-qca-nss-drv-igs=y
-# CONFIG_PACKAGE_sqm-scripts-nss=y
-# CONFIG_PACKAGE_luci-app-sqm=y
+## CONFIG_PACKAGE_sqm-scripts-nss=y
+## CONFIG_PACKAGE_luci-app-sqm=y
 
 ## NSS runtime tools from the openwrt fork's nss-tools package: the 'nss'
 ## boot service + nss-up bring-up, nss-status health report (Status -> NSS
@@ -113,8 +129,8 @@ CONFIG_PACKAGE_luci-app-nss=y
 ## DSCP marking + SQM fast-lane prioritization. CLI: /etc/config/nssqos
 ## (rendered into the standalone nftables table 'inet nssqos'); UI:
 ## Network -> QoS Marking (NSS). Works on NSS-accelerated flows.
-# CONFIG_PACKAGE_nssqos=y
-# CONFIG_PACKAGE_luci-app-nssqos=y
+## CONFIG_PACKAGE_nssqos=y
+## CONFIG_PACKAGE_luci-app-nssqos=y
 
 ## Diagnostics: firmware-path packet mirroring + live NSS statistics viewer;
 ## loaded on demand, inert by default.
@@ -128,6 +144,10 @@ CONFIG_KERNEL_DEVMEM=y
 CONFIG_BUSYBOX_CUSTOM=y
 CONFIG_BUSYBOX_CONFIG_DEVMEM=y
 
+## Crash forensics: persist the kernel console and panic traces across
+## reboots in the board's ramoops region; the image archives them to
+## /root/pstore on the next boot.
+## CONFIG_PACKAGE_kmod-ramoops=y
 
 ## sing-box依赖
 CONFIG_PACKAGE_ca-bundle=y
@@ -154,62 +174,11 @@ CONFIG_PACKAGE_luci-compat=y
 CONFIG_PACKAGE_luci=y
 CONFIG_PACKAGE_luci-base=y
 
-## USB支持
-# CONFIG_PACKAGE_kmod-usb-storage=y
-# CONFIG_PACKAGE_kmod-usb-storage-extras=y
-# CONFIG_PACKAGE_kmod-usb-storage-uas=y
-## USB诊断工具
-# CONFIG_PACKAGE_usbutils=y
-
-## 自动挂载插件
-# CONFIG_PACKAGE_block-mount=y
-# CONFIG_PACKAGE_blockd=y
-# CONFIG_PACKAGE_mount-utils=y
-
-## USB挂载格式支持插件
-# CONFIG_PACKAGE_kmod-fs-ext4=y
-# CONFIG_PACKAGE_kmod-fs-vfat=y
-# CONFIG_PACKAGE_kmod-fs-xfs=y
-# CONFIG_PACKAGE_kmod-fs-ntfs3=y
-# CONFIG_PACKAGE_kmod-fs-exfat=y
-
 ## 国际化与语言编码支持
 ## Unicode 字符编码支持
 CONFIG_PACKAGE_kmod-nls-utf8=y
 ## 微软简体中文 GBK/GB2312 编码兼容
 CONFIG_PACKAGE_kmod-nls-cp936=y
-
-## 分区管理工具
-# CONFIG_PACKAGE_cfdisk=y
-
-## 查看分区插件
-# CONFIG_PACKAGE_lsblk=y
-
-## 外置存储自动休眠保护插件
-# CONFIG_PACKAGE_luci-app-hd-idle=y
-# CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=y
-
-## 共享插件
-CONFIG_PACKAGE_luci-app-ksmbd=y
-# CONFIG_PACKAGE_luci-i18n-ksmbd-zh-cn=y
-
-## docker插件
-CONFIG_PACKAGE_luci-app-dockerman=y
-# CONFIG_PACKAGE_luci-i18n-dockerman-zh-cn=y
-
-## MiniDLNA多媒体共享插件
-# CONFIG_PACKAGE_luci-app-minidlna=y
-# CONFIG_PACKAGE_luci-i18n-minidlna-zh-cn=y
-## 解决mbedTLS依赖导致build失败问题
-# 取消勾选 mbedTLS 后端
-# CONFIG_FFMPEG_TLS_MBEDTLS is not set
-# 开启 OpenSSL 后端
-# CONFIG_FFMPEG_TLS_OPENSSL=y
-
-## aria2下载插件
-CONFIG_PACKAGE_luci-app-aria2=y
-# CONFIG_PACKAGE_luci-i18n-aria2-zh-cn=y
-CONFIG_PACKAGE_ariang=y
 
 ## 统计cpu、温度、系统负载、内存等插件
 CONFIG_PACKAGE_luci-app-statistics=y
@@ -218,14 +187,3 @@ CONFIG_PACKAGE_collectd-mod-sensors=y
 
 ## ttyd终端
 CONFIG_PACKAGE_luci-app-ttyd=y
-
-## 汉化包
-# CONFIG_PACKAGE_luci-i18n-base-zh-cn=y
-# CONFIG_PACKAGE_luci-i18n-package-manager-zh-cn=y
-
-## 防火墙汉化包
-# CONFIG_PACKAGE_luci-i18n-firewall-zh-cn=y
-
-
-
-
