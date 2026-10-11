@@ -80,8 +80,19 @@ if [[ -n "$FEEDS" ]]; then
   done <<<"$FEEDS"
 fi
 
-log::info "Updating + installing all feeds"
-./scripts/feeds update -a
+
+log::info "Updating feeds..."
+./scripts/feeds update -a || {
+  log::warn "First feeds update failed, retrying..."
+  ./scripts/feeds update -a
+}
+
+# 校验 feeds 目录是否成功拉取源码
+if [ ! -d "feeds/packages" ] || [ ! -d "feeds/luci" ]; then
+  log::die "Feeds update failed: feeds/packages or feeds/luci directory is missing!"
+fi
+
+log::info "Installing all feeds..."
 ./scripts/feeds install -a
 
 # 1b. Apply local patches to feed packages

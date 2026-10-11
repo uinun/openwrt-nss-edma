@@ -91,6 +91,7 @@ jobs:
         DEVICE: ${{ matrix.device }}
         COMMON: ${{ env.COMMON }}
         VARIANT: ${{ env.VARIANT }}
+        FEEDS: ${{ env.FEEDS }}
       run: |
         bash builder/scripts/prepare-build.sh
 
@@ -108,6 +109,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: nssOpenwrt7-${{ matrix.device }}
+        if-no-files-found: warn
         path: |
           ${{ env.OPENWRT_DIR }}/bin/targets/**/*sysupgrade*
           ${{ env.OPENWRT_DIR }}/bin/targets/**/*factory*
