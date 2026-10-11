@@ -113,6 +113,35 @@ done
 shopt -u nullglob
 
 
+# ============= 在这里插入修复libbpf代码 =========================
+
+# 修复 GCC 15 + aarch64 下 asm/ptrace.h 缺少 __u128 定义引发 libbpf 编译失败的问题
+log::info "Patching asm/ptrace.h for __u128 definition..."
+# 1. 如果 toolchain 目录或 kernel headers 里有 asm/ptrace.h，提前修复
+find . -path "*/include/asm/ptrace.h" | while read -r ptrace_header; do
+  if ! grep -q "__u128" "$ptrace_header" || grep -q "typedef unsigned __int128 __u128;" "$ptrace_header"; then
+    continue
+  fi
+  sed -i '1i #ifndef __u128\ntypedef unsigned __int128 __u128;\n#endif' "$ptrace_header"
+done
+
+# 2. 针对 libbpf 源码，在其核心头文件最顶部引入 __u128 补丁
+find package/ -path "*/libbpf*/src/libbpf.c" -o -path "*/libbpf*/src/bpf.h" 2>/dev/null | while read -r src_file; do
+  sed -i '1i #ifndef __u128\ntypedef unsigned __int128 __u128;\n#endif' "$src_file"
+done
+
+if [ -f "package/libs/libbpf/Makefile" ]; then
+  log::info "Injecting __u128 definition into libbpf Makefile CFLAGS..."
+  sed -i 's/-Werror//g' package/libs/libbpf/Makefile
+  # 在 TARGET_CFLAGS 后面追加 __u128 定义
+  sed -i '/TARGET_CFLAGS +=/a TARGET_CFLAGS += -D__u128="unsigned __int128"' package/libs/libbpf/Makefile || true
+  # 兼容部分 Makefile 结构：直接在 make 传参时补充 EXTRA_CFLAGS
+  sed -i 's/EXTRA_CFLAGS="/EXTRA_CFLAGS="-D__u128=\\"unsigned __int128\\" /g' package/libs/libbpf/Makefile || true
+fi
+
+# ===================================================================
+
+
 # 2. Assemble .config from the common + device configs, then resolve.
 log::info "Assembling .config from ${CONFIGS[*]#"$BUILDER_REPO"/}"
 : > .config
