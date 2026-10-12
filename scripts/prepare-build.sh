@@ -114,38 +114,43 @@ shopt -u nullglob
 
 
 
-# ============= 修复 libbpf 代码 =========================
+# ============= 修复 GCC 15 __u128 报错 =========================
 
-if [ -f "package/libs/libbpf/Makefile" ]; then
-  log::info "Patching package/libs/libbpf/Makefile..."
-  
-  # 1. 彻底移除有语法问题的 999 补丁（防止残留）
-  rm -f package/libs/libbpf/patches/999-fix-gcc15-u128.patch
+log::info "Fixing kernel headers and libbpf for GCC 15..."
 
-  # 2. 移除 -Werror，避免警告当错误
-  sed -i 's/-Werror//g' package/libs/libbpf/Makefile
+# 1. 直接搜索 target/linux 下所有的 ptrace.h 补丁和头文件源文件，直接注入 __u128 定义
+find target/linux/ -type f -name "*ptrace*.h" 2>/dev/null | while read -r f; do
+  sed -i '1i #ifndef __u128\ntypedef unsigned __int128 __u128;\n#endif' "$f"
+done
 
-  # 3. 直接在 Makefile 的 TARGET_CFLAGS 和 MAKE_VARS 强行注入 __u128 定义
-  # 不论 libbpf.c 怎么引用内核头文件，预处理器会把所有 __u128 替换为 __uint128_t
-  sed -i 's/EXTRA_CFLAGS="/EXTRA_CFLAGS="-D__u128=__uint128_t /g' package/libs/libbpf/Makefile || true
-  sed -i '/TARGET_CFLAGS +=/a TARGET_CFLAGS += -D__u128=__uint128_t' package/libs/libbpf/Makefile || true
-  echo 'TARGET_CFLAGS += -D__u128=__uint128_t' >> package/libs/libbpf/Makefile
-  echo 'MAKE_VARS += EXTRA_CFLAGS="-D__u128=__uint128_t"' >> package/libs/libbpf/Makefile
-
-# 4. 在 Build/Prepare 解压源码完成后，直接用 sed 注入到源文件顶部（安全无 patch 格式问题）
-  # TAB=$'\t'
-  # sed -i "/Build\/Prepare/a \\${TAB}sed -i '1i #ifndef __u128\\\\ntypedef unsigned __int128 __u128;\\\\n#endif' \$(PKG_BUILD_DIR)/src/libbpf.c" package/libs/libbpf/Makefile || true
-fi
-
-# 5. 对内核 target 头文件中的 ptrace.h 打补丁
-log::info "Patching ptrace.h headers in target source tree..."
-find target/ toolchain/ package/ -type f -name "ptrace.h" 2>/dev/null | while read -r header; do
-  if grep -q "vregs\[32\]" "$header" && ! grep -q "typedef unsigned __int128 __u128" "$header"; then
-    sed -i '1i #ifndef __u128\ntypedef unsigned __int128 __u128;\n#endif' "$header"
+# 2. 为 target/linux/generic 的内核头文件创建一个简化的追加 patch
+mkdir -p target/linux/generic/pending-6.6 target/linux/generic/pending-6.1
+for patch_dir in target/linux/generic/pending-*; do
+  if [ -d "$patch_dir" ]; then
+    cat << 'EOF' > "$patch_dir/999-arm64-ptrace-u128.patch"
+--- a/arch/arm64/include/uapi/asm/ptrace.h
++++ b/arch/arm64/include/uapi/asm/ptrace.h
+@@ -21,0 +22,4 @@
++#ifndef __u128
++typedef unsigned __int128 __u128;
++#endif
+EOF
   fi
 done
 
-# =======================================================
+# 3. 拦截 libbpf：直接修改 package/libs/libbpf/Makefile 中的编译调用
+if [ -f "package/libs/libbpf/Makefile" ]; then
+  sed -i 's/-Werror//g' package/libs/libbpf/Makefile
+  
+  # 直接将宏写入 gcc 包装器或通过 sed 修改 libbpf 自身的 Makefile
+  # 在 libbpf 源码被解压后，强制将其引用的头文件注入 __u128
+  sed -i 's/CFLAGS="$(TARGET_CFLAGS)"/CFLAGS="$(TARGET_CFLAGS) -D__u128=__uint128_t"/g' package/libs/libbpf/Makefile || true
+  echo 'TARGET_CFLAGS += -D__u128=__uint128_t' >> package/libs/libbpf/Makefile
+  echo 'MAKE_VARS += EXTRA_CFLAGS="-D__u128=__uint128_t"' >> package/libs/libbpf/Makefile
+fi
+
+# =============================================================
+
 
 
 # 2. Assemble .config from the common + device configs, then resolve.
