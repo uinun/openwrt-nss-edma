@@ -113,33 +113,36 @@ done
 shopt -u nullglob
 
 
-# ============= 在这里插入修复libbpf代码 =========================
+# ============= 修复 libbpf 代码 =========================
 
-# 修复 GCC 15 + aarch64 下 asm/ptrace.h 缺少 __u128 定义引发 libbpf 编译失败的问题
-log::info "Patching asm/ptrace.h for __u128 definition..."
-# 1. 如果 toolchain 目录或 kernel headers 里有 asm/ptrace.h，提前修复
-find . -path "*/include/asm/ptrace.h" | while read -r ptrace_header; do
-  if ! grep -q "__u128" "$ptrace_header" || grep -q "typedef unsigned __int128 __u128;" "$ptrace_header"; then
-    continue
-  fi
-  sed -i '1i #ifndef __u128\ntypedef unsigned __int128 __u128;\n#endif' "$ptrace_header"
-done
-
-# 2. 针对 libbpf 源码，在其核心头文件最顶部引入 __u128 补丁
-find package/ -path "*/libbpf*/src/libbpf.c" -o -path "*/libbpf*/src/bpf.h" 2>/dev/null | while read -r src_file; do
-  sed -i '1i #ifndef __u128\ntypedef unsigned __int128 __u128;\n#endif' "$src_file"
-done
-
+# 1. 消除 Makefile 中的 -Werror，并强制注入 EXTRA_CFLAGS 和 TARGET_CFLAGS
 if [ -f "package/libs/libbpf/Makefile" ]; then
-  log::info "Injecting __u128 definition into libbpf Makefile CFLAGS..."
+  log::info "Patching package/libs/libbpf/Makefile..."
   sed -i 's/-Werror//g' package/libs/libbpf/Makefile
-  # 在 TARGET_CFLAGS 后面追加 __u128 定义
-  sed -i '/TARGET_CFLAGS +=/a TARGET_CFLAGS += -D__u128="unsigned __int128"' package/libs/libbpf/Makefile || true
-  # 兼容部分 Makefile 结构：直接在 make 传参时补充 EXTRA_CFLAGS
-  sed -i 's/EXTRA_CFLAGS="/EXTRA_CFLAGS="-D__u128=\\"unsigned __int128\\" /g' package/libs/libbpf/Makefile || true
+  sed -i 's/EXTRA_CFLAGS="/EXTRA_CFLAGS="-D__u128=__uint128_t /g' package/libs/libbpf/Makefile || true
+  echo 'TARGET_CFLAGS += -D__u128=__uint128_t' >> package/libs/libbpf/Makefile
 fi
 
-# ===================================================================
+# 2. 直接对 target/linux 中解压内核 headers 的源文件打补丁（彻底根治）
+log::info "Patching ptrace.h headers in target source tree..."
+find target/ toolchain/ package/ -type f -name "ptrace.h" 2>/dev/null | while read -r header; do
+  if grep -q "vregs\[32\]" "$header" && ! grep -q "__u128" "$header"; then
+    sed -i '1i #ifndef __u128\ntypedef unsigned __int128 __u128;\n#endif' "$header"
+  fi
+done
+
+# 3. 准备补丁注入到 libbpf 的 patches 目录中
+mkdir -p package/libs/libbpf/patches
+cat << 'EOF' > package/libs/libbpf/patches/999-fix-gcc15-u128.patch
+--- a/src/libbpf.c
++++ b/src/libbpf.c
+@@ -20,0 +21,4 @@
++#ifndef __u128
++typedef unsigned __int128 __u128;
++#endif
+EOF
+
+# =======================================================
 
 
 # 2. Assemble .config from the common + device configs, then resolve.
