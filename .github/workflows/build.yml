@@ -18,8 +18,8 @@ permissions:
   contents: read
 
 env:
-  UPSTREAM_REPO: JuliusBairaktaris/openwrt-nss-edma
-  UPSTREAM_REF: nss-edma-7.3
+  UPSTREAM_REPO: JuliusBairaktaris/openwrt-ppe-nss
+  UPSTREAM_REF: archive/nss-edma-7.3-vendor-20261011
   COMMON: common
   VARIANT: edma-nss
   OPENWRT_DIR: openwrt-nss-edma
