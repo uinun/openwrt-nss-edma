@@ -23,7 +23,7 @@ env:
   COMMON: common
   VARIANT: edma-nss
   OPENWRT_DIR: openwrt-nss-edma
-  FEEDS: "src-git nss https://github.com/JuliusBairaktaris/nss-packages.git;edma-nss"
+  FEEDS: "src-git nss https://github.com/JuliusBairaktaris/nss-packages.git;archive/edma-nss-7.3-feed-20261011"
 
 jobs:
   # 步骤 1：解析用户输入，动态生成 matrix
