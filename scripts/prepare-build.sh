@@ -113,34 +113,37 @@ done
 shopt -u nullglob
 
 
+
 # ============= 修复 libbpf 代码 =========================
 
-# 1. 消除 Makefile 中的 -Werror，并强制注入 EXTRA_CFLAGS 和 TARGET_CFLAGS
 if [ -f "package/libs/libbpf/Makefile" ]; then
   log::info "Patching package/libs/libbpf/Makefile..."
+  
+  # 1. 彻底移除有语法问题的 999 补丁（防止残留）
+  rm -f package/libs/libbpf/patches/999-fix-gcc15-u128.patch
+
+  # 2. 移除 -Werror，避免警告当错误
   sed -i 's/-Werror//g' package/libs/libbpf/Makefile
+
+  # 3. 直接在 Makefile 的 TARGET_CFLAGS 和 MAKE_VARS 强行注入 __u128 定义
+  # 不论 libbpf.c 怎么引用内核头文件，预处理器会把所有 __u128 替换为 __uint128_t
   sed -i 's/EXTRA_CFLAGS="/EXTRA_CFLAGS="-D__u128=__uint128_t /g' package/libs/libbpf/Makefile || true
+  sed -i '/TARGET_CFLAGS +=/a TARGET_CFLAGS += -D__u128=__uint128_t' package/libs/libbpf/Makefile || true
   echo 'TARGET_CFLAGS += -D__u128=__uint128_t' >> package/libs/libbpf/Makefile
+  echo 'MAKE_VARS += EXTRA_CFLAGS="-D__u128=__uint128_t"' >> package/libs/libbpf/Makefile
+
+# 4. 在 Build/Prepare 解压源码完成后，直接用 sed 注入到源文件顶部（安全无 patch 格式问题）
+  # TAB=$'\t'
+  # sed -i "/Build\/Prepare/a \\${TAB}sed -i '1i #ifndef __u128\\\\ntypedef unsigned __int128 __u128;\\\\n#endif' \$(PKG_BUILD_DIR)/src/libbpf.c" package/libs/libbpf/Makefile || true
 fi
 
-# 2. 直接对 target/linux 中解压内核 headers 的源文件打补丁（彻底根治）
+# 5. 对内核 target 头文件中的 ptrace.h 打补丁
 log::info "Patching ptrace.h headers in target source tree..."
 find target/ toolchain/ package/ -type f -name "ptrace.h" 2>/dev/null | while read -r header; do
-  if grep -q "vregs\[32\]" "$header" && ! grep -q "__u128" "$header"; then
+  if grep -q "vregs\[32\]" "$header" && ! grep -q "typedef unsigned __int128 __u128" "$header"; then
     sed -i '1i #ifndef __u128\ntypedef unsigned __int128 __u128;\n#endif' "$header"
   fi
 done
-
-# 3. 准备补丁注入到 libbpf 的 patches 目录中
-mkdir -p package/libs/libbpf/patches
-cat << 'EOF' > package/libs/libbpf/patches/999-fix-gcc15-u128.patch
---- a/src/libbpf.c
-+++ b/src/libbpf.c
-@@ -20,0 +21,4 @@
-+#ifndef __u128
-+typedef unsigned __int128 __u128;
-+#endif
-EOF
 
 # =======================================================
 
