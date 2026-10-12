@@ -100,15 +100,14 @@ jobs:
       run: |
         make download -j$(nproc)
 
-
     - name: Build Toolchain & Kernel Headers
       working-directory: ${{ env.OPENWRT_DIR }}
       run: |
-        # 1. 编译工具链与内核头文件
+        # 1. 编译安装工具链及内核头文件（此时没有损坏的 patch 干扰，会顺利完成）
         make toolchain/install -j$(nproc) || make toolchain/install -j1 V=s
         make target/linux/prepare -j$(nproc) || make target/linux/compile -j$(nproc) || true
 
-        # 2. 方案 B：此时 asm/ptrace.h 已经落地，执行注入
+        # 2. 此时 staging_dir 的 asm/ptrace.h 已经完全生成，直接物理注入补丁
         echo "=== Patching staging_dir headers for GCC 15 ==="
         find staging_dir/ -type f -name "ptrace.h" 2>/dev/null | while read -r header; do
           if grep -q "vregs\[32\]" "$header" && ! grep -q "typedef unsigned __int128 __u128" "$header"; then

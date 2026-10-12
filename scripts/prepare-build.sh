@@ -118,32 +118,19 @@ shopt -u nullglob
 
 log::info "Fixing kernel headers and libbpf for GCC 15..."
 
-# 1. 直接搜索 target/linux 下所有的 ptrace.h 补丁和头文件源文件，直接注入 __u128 定义
-find target/linux/ -type f -name "*ptrace*.h" 2>/dev/null | while read -r f; do
-  sed -i '1i #ifndef __u128\ntypedef unsigned __int128 __u128;\n#endif' "$f"
-done
+# 1. 彻底清理可能残留的坏补丁文件（避免中断构建）
+find target/linux/ -name "999-arm64-ptrace-u128.patch" -delete 2>/dev/null || true
 
-# 2. 为 target/linux/generic 的内核头文件创建一个简化的追加 patch
-mkdir -p target/linux/generic/pending-6.6 target/linux/generic/pending-6.1
-for patch_dir in target/linux/generic/pending-*; do
-  if [ -d "$patch_dir" ]; then
-    cat << 'EOF' > "$patch_dir/999-arm64-ptrace-u128.patch"
---- a/arch/arm64/include/uapi/asm/ptrace.h
-+++ b/arch/arm64/include/uapi/asm/ptrace.h
-@@ -21,0 +22,4 @@
-+#ifndef __u128
-+typedef unsigned __int128 __u128;
-+#endif
-EOF
+# 2. 如果 target/linux 源码树里已经有现成的 ptrace.h，直接用 sed 注入（不依赖 patch 工具）
+find target/linux/ -type f -name "*ptrace*.h" 2>/dev/null | while read -r f; do
+  if grep -q "vregs\[32\]" "$f" && ! grep -q "typedef unsigned __int128 __u128" "$f"; then
+    sed -i '1i #ifndef __u128\ntypedef unsigned __int128 __u128;\n#endif' "$f"
   fi
 done
 
-# 3. 拦截 libbpf：直接修改 package/libs/libbpf/Makefile 中的编译调用
+# 3. 拦截 libbpf 编译规则
 if [ -f "package/libs/libbpf/Makefile" ]; then
   sed -i 's/-Werror//g' package/libs/libbpf/Makefile
-  
-  # 直接将宏写入 gcc 包装器或通过 sed 修改 libbpf 自身的 Makefile
-  # 在 libbpf 源码被解压后，强制将其引用的头文件注入 __u128
   sed -i 's/CFLAGS="$(TARGET_CFLAGS)"/CFLAGS="$(TARGET_CFLAGS) -D__u128=__uint128_t"/g' package/libs/libbpf/Makefile || true
   echo 'TARGET_CFLAGS += -D__u128=__uint128_t' >> package/libs/libbpf/Makefile
   echo 'MAKE_VARS += EXTRA_CFLAGS="-D__u128=__uint128_t"' >> package/libs/libbpf/Makefile
