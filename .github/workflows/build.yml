@@ -87,14 +87,16 @@ jobs:
     - name: Enable PWM support in qualcommax target
       run: |
         cd ${{ env.OPENWRT_DIR }}
-        # 1. 向 qualcommax 所有版本的内核模板中强制注入 CONFIG_PWM=y
+        # 1. 注入内核底层 PWM 及 PWM_GPIO
         for f in target/linux/qualcommax/config-*; do
           if [ -f "$f" ]; then
             sed -i '/CONFIG_PWM/d' "$f"
             echo "CONFIG_PWM=y" >> "$f"
+            echo "CONFIG_PWM_GPIO=y" >> "$f"
           fi
         done
-        # 2. 如果 target 的 Makefile 存在 FEATURES 声明，确保包含 pwm 特性
+
+        # 2. 声明 target 平台特性具备 pwm 和 gpio
         if [ -f target/linux/qualcommax/Makefile ]; then
           sed -i '/FEATURES+=/ s/$/ pwm/' target/linux/qualcommax/Makefile 2>/dev/null || true
         fi
