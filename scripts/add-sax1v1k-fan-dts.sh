@@ -23,7 +23,7 @@ cat << 'EOF' >> "$DTS_FILE"
 		#pwm-cells = <3>;
 		pinctrl-0 = <&fan_pwm_pins>;
 		pinctrl-names = "default";
-		gpios = <&tlmm 27 GPIO_ACTIVE_HIGH>;
+		gpios = <&tlmm 27 0>;
 	};
 
 	fan: pwm-fan {

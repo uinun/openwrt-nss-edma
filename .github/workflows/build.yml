@@ -84,22 +84,13 @@ jobs:
         ref: ${{ env.UPSTREAM_REF }}
         path: ${{ env.OPENWRT_DIR }}
 
-    - name: Enable PWM support in qualcommax target
+    - name: Add SAX1V1K Fan Support(config-default)
+      if: matrix.device == 'sax1v1k'
       run: |
-        cd ${{ env.OPENWRT_DIR }}
-        # 1. 注入内核底层 PWM 及 PWM_GPIO
-        for f in target/linux/qualcommax/config-*; do
-          if [ -f "$f" ]; then
-            sed -i '/CONFIG_PWM/d' "$f"
-            echo "CONFIG_PWM=y" >> "$f"
-            echo "CONFIG_PWM_GPIO=y" >> "$f"
-          fi
-        done
+        cd $OPENWRT_DIR
+        chmod +x $GITHUB_WORKSPACE/builder/scripts/add-sax1v1k-fan-config-default.sh
+        $GITHUB_WORKSPACE/builder/scripts/add-sax1v1k-fan-config-default.sh
 
-        # 2. 声明 target 平台特性具备 pwm 和 gpio
-        if [ -f target/linux/qualcommax/Makefile ]; then
-          sed -i '/FEATURES+=/ s/$/ pwm/' target/linux/qualcommax/Makefile 2>/dev/null || true
-        fi
 
     - name: Prepare build environment
       env:
@@ -112,12 +103,12 @@ jobs:
       run: |
         bash builder/scripts/prepare-build.sh
 
-    - name: Add SAX1V1K Fan Support
+    - name: Add SAX1V1K Fan Support(dts)
       if: matrix.device == 'sax1v1k'
       run: |
         cd $OPENWRT_DIR
-        chmod +x $GITHUB_WORKSPACE/builder/scripts/add-sax1v1k-fan.sh
-        $GITHUB_WORKSPACE/builder/scripts/add-sax1v1k-fan.sh
+        chmod +x $GITHUB_WORKSPACE/builder/scripts/add-sax1v1k-fan-dts.sh
+        $GITHUB_WORKSPACE/builder/scripts/add-sax1v1k-fan-dts.sh   
 
     - name: Download sources
       working-directory: ${{ env.OPENWRT_DIR }}
