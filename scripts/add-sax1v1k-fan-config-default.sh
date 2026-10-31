@@ -20,10 +20,10 @@ if [ -f "$TARGET_MAKEFILE" ]; then
     fi
 fi
 
-# 2. 注入内核底层 PWM 及 Fan 支持
+# 2. 注入内核底层 PWM 及 Fan 支持，并显式关闭因开启 PWM 而暴露出的 7.3 内核新驱动提示
 if [ -f "$TARGET_CONF" ]; then
     echo "[INFO] Injecting PWM and Fan configs into $TARGET_CONF"
-    sed -i -E '/CONFIG_(PWM|PWM_SYSFS|PWM_GPIO|HWMON|SENSORS_PWM_FAN|THERMAL_HWMON)/d' "$TARGET_CONF"
+    sed -i -E '/CONFIG_(PWM|PWM_SYSFS|PWM_GPIO|HWMON|SENSORS_PWM_FAN|THERMAL_HWMON|LTC2378|PWM_CLK|REGULATOR_PWM)/d' "$TARGET_CONF"
     cat << 'EOF' >> "$TARGET_CONF"
 CONFIG_PWM=y
 CONFIG_PWM_SYSFS=y
@@ -33,9 +33,19 @@ CONFIG_SENSORS_PWM_FAN=y
 CONFIG_THERMAL_HWMON=y
 # CONFIG_LEDS_QCOM_LPG is not set
 # CONFIG_PWM_IPQ is not set
+# CONFIG_PWM_CLK is not set
+# CONFIG_REGULATOR_PWM is not set
+# CONFIG_LTC2378 is not set
 EOF
     echo "[INFO] Successfully injected configs."
 else
     echo "[ERROR] $TARGET_CONF not found!"
     exit 1
+fi
+
+# 3. 兜底防护：如果 linux-7.3 还有其他未声明的新符号，允许 syncconfig 自动取默认值而不报错中断
+KERNEL_MK="${GITHUB_WORKSPACE}/${OPENWRT_DIR}/include/kernel-defaults.mk"
+[ ! -f "$KERNEL_MK" ] && KERNEL_MK="include/kernel-defaults.mk"
+if [ -f "$KERNEL_MK" ]; then
+    sed -i 's/syncconfig/olddefconfig/g' "$KERNEL_MK" 2>/dev/null || true
 fi
