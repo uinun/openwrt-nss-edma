@@ -44,6 +44,12 @@ CONFIG_LUCI_LANG_zh_Hans=y
 ## 风扇控制
 # CONFIG_LEDS_QCOM_LPG is not set
 # CONFIG_PWM_IPQ is not set
+# 1. 开启平台级 PWM 框架支持（解除 kmod 依赖阻断的关键）
+CONFIG_PWM_SUPPORT=y
+CONFIG_PACKAGE_kmod-pwm=y
+# 2. 内核底层 PWM 核心
+CONFIG_PWM=y
+# 3. 目标风扇模块
 CONFIG_PACKAGE_kmod-hwmon-core=y
 CONFIG_PACKAGE_kmod-thermal=y
 CONFIG_PACKAGE_kmod-pwm-gpio=y
