@@ -40,4 +40,11 @@ CONFIG_PACKAGE_lsblk=y
 
 ## 添加标准的全局中文包配置（只要主 App 存在，对应语言会自动打包生效）
 CONFIG_LUCI_LANG_zh_Hans=y
-# CONFIG_PACKAGE_luci-i18n-base-zh-Hans=y
+
+## 风扇控制
+# CONFIG_LEDS_QCOM_LPG is not set
+# CONFIG_PWM_IPQ is not set
+CONFIG_PACKAGE_kmod-hwmon-core=y
+CONFIG_PACKAGE_kmod-thermal=y
+CONFIG_PACKAGE_kmod-pwm-gpio=y
+CONFIG_PACKAGE_kmod-hwmon-pwmfan=y

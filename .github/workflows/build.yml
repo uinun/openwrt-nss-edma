@@ -95,6 +95,13 @@ jobs:
       run: |
         bash builder/scripts/prepare-build.sh
 
+    - name: Add SAX1V1K Fan Support
+      if: matrix.device == 'sax1v1k'
+      run: |
+        cd $OPENWRT_DIR
+        chmod +x $GITHUB_WORKSPACE/builder/scripts/add-sax1v1k-fan.sh
+        $GITHUB_WORKSPACE/builder/scripts/add-sax1v1k-fan.sh
+
     - name: Download sources
       working-directory: ${{ env.OPENWRT_DIR }}
       run: |
