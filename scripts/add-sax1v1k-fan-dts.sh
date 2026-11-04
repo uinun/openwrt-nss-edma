@@ -29,7 +29,6 @@ cat << 'EOF' >> "$DTS_FILE"
 	fan: pwm-fan {
 		compatible = "pwm-fan";
 		pwms = <&fan_pwm 0 1000000 0>;
-		/* 0: 停转, 1: 30%, 2: 50%, 3: 75% */
 		cooling-levels = <0 80 128 191>;
 		#cooling-cells = <2>;
 		interrupt-parent = <&tlmm>;
@@ -37,6 +36,66 @@ cat << 'EOF' >> "$DTS_FILE"
 		pulses-per-revolution = <2>;
 		pinctrl-0 = <&fan_tach_pins>;
 		pinctrl-names = "default";
+	};
+
+	/* 全部统一使用绝对路径挂载，规避 Label 缺失与命名不一致问题 */
+	thermal-zones {
+
+		/* 1. CPU 监测点：CPU 核心 3 */
+		cpu3-thermal {
+			trips {
+				cpu3_fan_low: fan-low { temperature = <73000>; hysteresis = <6000>; type = "active"; };
+				cpu3_fan_high: fan-high { temperature = <80000>; hysteresis = <3000>; type = "active"; };
+				cpu3_fan_max: fan-max { temperature = <90000>; hysteresis = <3000>; type = "active"; };
+			};
+			cooling-maps {
+				fan-active-low { trip = <&cpu3_fan_low>; cooling-device = <&fan 1 1>; };
+				fan-active-high { trip = <&cpu3_fan_high>; cooling-device = <&fan 2 2>; };
+				fan-active-max { trip = <&cpu3_fan_max>; cooling-device = <&fan 3 3>; };
+			};
+		};
+
+		/* 2. NSS 网络加速引擎监测点：NSS Core 0 */
+		nss0-thermal {
+			trips {
+				nss0_fan_low: fan-low { temperature = <73000>; hysteresis = <6000>; type = "active"; };
+				nss0_fan_high: fan-high { temperature = <80000>; hysteresis = <3000>; type = "active"; };
+				nss0_fan_max: fan-max { temperature = <90000>; hysteresis = <3000>; type = "active"; };
+			};
+			cooling-maps {
+				fan-active-low { trip = <&nss0_fan_low>; cooling-device = <&fan 1 1>; };
+				fan-active-high { trip = <&nss0_fan_high>; cooling-device = <&fan 2 2>; };
+				fan-active-max { trip = <&nss0_fan_max>; cooling-device = <&fan 3 3>; };
+			};
+		};
+
+		/* 3. 无线射频基带监测点：WCSS 5G 物理层 (对应 ath11k 射频高热区域) */
+		wcss-phyb0-thermal {
+			trips {
+				wcss_b_fan_low: fan-low { temperature = <73000>; hysteresis = <6000>; type = "active"; };
+				wcss_b_fan_high: fan-high { temperature = <80000>; hysteresis = <3000>; type = "active"; };
+				wcss_b_fan_max: fan-max { temperature = <90000>; hysteresis = <3000>; type = "active"; };
+			};
+			cooling-maps {
+				fan-active-low { trip = <&wcss_b_fan_low>; cooling-device = <&fan 1 1>; };
+				fan-active-high { trip = <&wcss_b_fan_high>; cooling-device = <&fan 2 2>; };
+				fan-active-max { trip = <&wcss_b_fan_max>; cooling-device = <&fan 3 3>; };
+			};
+		};
+
+		/* 4. 无线射频基带监测点：WCSS 2.4G 物理层 */
+		wcss-phya0-thermal {
+			trips {
+				wcss_a_fan_low: fan-low { temperature = <73000>; hysteresis = <6000>; type = "active"; };
+				wcss_a_fan_high: fan-high { temperature = <80000>; hysteresis = <3000>; type = "active"; };
+				wcss_a_fan_max: fan-max { temperature = <90000>; hysteresis = <3000>; type = "active"; };
+			};
+			cooling-maps {
+				fan-active-low { trip = <&wcss_a_fan_low>; cooling-device = <&fan 1 1>; };
+				fan-active-high { trip = <&wcss_a_fan_high>; cooling-device = <&fan 2 2>; };
+				fan-active-max { trip = <&wcss_a_fan_max>; cooling-device = <&fan 3 3>; };
+			};
+		};
 	};
 };
 
@@ -54,62 +113,6 @@ cat << 'EOF' >> "$DTS_FILE"
 		function = "gpio";
 		drive-strength = <2>;
 		bias-pull-up;
-	};
-};
-
-/* 1. CPU 监测点：CPU 核心 3 */
-&cpu3_thermal {
-	trips {
-		cpu3_fan_low: fan-low { temperature = <73000>; hysteresis = <6000>; type = "active"; };
-		cpu3_fan_high: fan-high { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-		cpu3_fan_max: fan-max { temperature = <90000>; hysteresis = <3000>; type = "active"; };
-	};
-	cooling-maps {
-		fan-active-low { trip = <&cpu3_fan_low>; cooling-device = <&fan 1 1>; };
-		fan-active-high { trip = <&cpu3_fan_high>; cooling-device = <&fan 2 2>; };
-		fan-active-max { trip = <&cpu3_fan_max>; cooling-device = <&fan 3 3>; };
-	};
-};
-
-/* 2. NSS 网络加速引擎监测点：NSS Core 0 */
-&nss0_thermal {
-	trips {
-		nss0_fan_low: fan-low { temperature = <73000>; hysteresis = <6000>; type = "active"; };
-		nss0_fan_high: fan-high { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-		nss0_fan_max: fan-max { temperature = <90000>; hysteresis = <3000>; type = "active"; };
-	};
-	cooling-maps {
-		fan-active-low { trip = <&nss0_fan_low>; cooling-device = <&fan 1 1>; };
-		fan-active-high { trip = <&nss0_fan_high>; cooling-device = <&fan 2 2>; };
-		fan-active-max { trip = <&nss0_fan_max>; cooling-device = <&fan 3 3>; };
-	};
-};
-
-/* 3. 无线射频基带监测点：WCSS 5G 物理层 (对应 ath11k 射频高热区域) */
-&wcss_phyb0_thermal {
-	trips {
-		wcss_fan_low: fan-low { temperature = <73000>; hysteresis = <6000>; type = "active"; };
-		wcss_fan_high: fan-high { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-		wcss_fan_max: fan-max { temperature = <90000>; hysteresis = <3000>; type = "active"; };
-	};
-	cooling-maps {
-		fan-active-low { trip = <&wcss_fan_low>; cooling-device = <&fan 1 1>; };
-		fan-active-high { trip = <&wcss_fan_high>; cooling-device = <&fan 2 2>; };
-		fan-active-max { trip = <&wcss_fan_max>; cooling-device = <&fan 3 3>; };
-	};
-};
-
-/* 4. 无线射频基带监测点：WCSS 2.4G 物理层 */
-&wcss_phya0_thermal {
-	trips {
-		wcss_fan_low: fan-low { temperature = <73000>; hysteresis = <6000>; type = "active"; };
-		wcss_fan_high: fan-high { temperature = <80000>; hysteresis = <3000>; type = "active"; };
-		wcss_fan_max: fan-max { temperature = <90000>; hysteresis = <3000>; type = "active"; };
-	};
-	cooling-maps {
-		fan-active-low { trip = <&wcss_fan_low>; cooling-device = <&fan 1 1>; };
-		fan-active-high { trip = <&wcss_fan_high>; cooling-device = <&fan 2 2>; };
-		fan-active-max { trip = <&wcss_fan_max>; cooling-device = <&fan 3 3>; };
 	};
 };
 EOF
